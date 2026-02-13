@@ -2,6 +2,8 @@
 
 Aplikasi pencarian dan manajemen film favorit dengan Laravel 5.8 dan OMDB API. Aplikasi ini memungkinkan pengguna untuk mencari film, melihat detail film, dan menyimpan film favorit mereka dengan dukungan multi-bahasa.
 
+> **Note**: Aplikasi ini **TIDAK menggunakan database** untuk menyimpan favorite. Semua data favorit disimpan dalam **JSON file** di `storage/app/favorites/`.
+
 ![Laravel](https://img.shields.io/badge/Laravel-5.8-red.svg)
 ![PHP](https://img.shields.io/badge/PHP-7.1+-blue.svg)
 ![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3-purple.svg)
@@ -79,9 +81,9 @@ Aplikasi pencarian dan manajemen film favorit dengan Laravel 5.8 dan OMDB API. A
 ### Requirements
 - **PHP**: >= 7.1.3 (Recommended: 7.3)
 - **Composer**: Latest stable
-- **Database**: MySQL 5.7+ / MariaDB 10.2+
 - **Web Server**: Laragon, XAMPP, atau sejenisnya
-- **Extensions**: PHP extensions: OpenSSL, PDO, Mbstring, Tokenizer, XML, Ctype, JSON, BCMath
+- **Extensions**: PHP extensions: OpenSSL, Mbstring, Tokenizer, XML, Ctype, JSON, BCMath
+- **Storage**: Write permission untuk folder `storage/app/favorites`
 
 ### Optional
 - Node.js & NPM (jika ingin menggunakan Laravel Mix untuk asset compilation)
@@ -114,13 +116,6 @@ APP_DEBUG=true
 APP_URL=http://localhost:8000
 
 LOG_CHANNEL=stack
-
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=movie_app
-DB_USERNAME=root
-DB_PASSWORD=
 ```
 
 Generate application key:
@@ -128,36 +123,18 @@ Generate application key:
 php artisan key:generate
 ```
 
-### 4. Buat Database
+> **Note**: Karena aplikasi menggunakan **JSON file storage** untuk favorite, **tidak perlu** konfigurasi database (`DB_*`) di `.env`.
 
-```sql
-CREATE DATABASE movie_app;
-```
+### 4. Buat Folder Storage (Optional)
 
-Atau gunakan phpMyAdmin / tools lainnya.
-
-### 5. Run Migrations
+Folder `storage/app/favorites` akan otomatis dibuat saat first favorite ditambahkan. Jika ingin buat manual:
 
 ```bash
-php artisan migrate
+mkdir -p storage/app/favorites
+chmod -R 775 storage/app/favorites
 ```
 
-**Struktur Tabel:**
-```sql
-CREATE TABLE favorites (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    user VARCHAR(255) NOT NULL,
-    imdbID VARCHAR(50) NOT NULL,
-    title VARCHAR(255) NOT NULL,
-    year VARCHAR(10) NOT NULL,
-    poster TEXT,
-    created_at TIMESTAMP NULL,
-    updated_at TIMESTAMP NULL,
-    UNIQUE KEY favorites_user_imdbid_unique (user, imdbID)
-);
-```
-
-### 6. Clear Cache (Optional)
+### 5. Clear Cache (Optional)
 
 ```bash
 php artisan config:clear
@@ -179,8 +156,6 @@ Aplikasi akan berjalan di `http://localhost:8000`
 Username: aldmic
 Password: 123abc123
 ```
-
-> **Note**: Ini adalah akun demo untuk testing. Autentikasi menggunakan session-based sederhana, bukan Laravel Auth.
 
 ## Penggunaan 📖
 
@@ -270,12 +245,36 @@ Password: 123abc123
 |--------|-----|-------------|---------|
 | GET | `/` | AuthController | showLogin |
 
-## Database & Query 🗄️
+## Storage & Query 🗄️
+
+### No Database Required!
+Aplikasi ini **TIDAK menggunakan database** (MySQL/PostgreSQL) untuk menyimpan favorite. Sebagai gantinya, digunakan:
+
+### JSON File Storage
+- **Lokasi**: `storage/app/favorites/`
+- **Per User**: Setiap user memiliki file terpisah: `{md5(username)}.json`
+- **Otomatis**: Folder dan file akan otomatis dibuat saat first favorite ditambahkan
 
 ### Data yang Disimpan
 - **Informasi film favorit**: judul, tahun, IMDB ID, poster URL
 - **Username** dari session login
 - **Timestamp**: created_at dan updated_at
+
+### Contoh Struktur JSON File
+```json
+[
+  {
+    "id": "67a3b123...",
+    "user": "aldmic",
+    "imdbID": "tt1234567",
+    "title": "Movie Title",
+    "year": "2024",
+    "poster": "http://...",
+    "created_at": "2026-02-13 10:00:00",
+    "updated_at": "2026-02-13 10:00:00"
+  }
+]
+```
 
 ## Struktur Project 📁
 
@@ -419,30 +418,10 @@ Aplikasi menggunakan OMDB API untuk mengambil data film.
 - Lazy loading ready
 - Responsive image sizing
 
-## Development Notes 📝
-
-### Laravel Version Note
-- Menggunakan Laravel 5.8 (rilis: 2019)
-- Kompatibel dengan PHP 7.1 - 7.3
-- Untuk PHP 8+, gunakan Laravel 8+
-
-### Authentication
-- Menggunakan session-based auth sederhana
-- Bukan Laravel Auth package
-- Username: `aldmic`, Password: `123abc123` (hardcoded di controller)
-
-### Future Enhancements
-- [ ] Laravel Sanctum untuk API auth
-- [ ] Real-time notifications
-- [ ] Movie reviews/ratings
-- [ ] Watchlist functionality
-- [ ] User profiles
-- [ ] Admin panel
-
 ## Credits & Resources 🙏
 
 ### Frameworks & Libraries
-- [Laravel 5.8](https://laravel.com/docs/5.8) - Web Application Framework
+- [Laravel 5.8](https://laravel.cm/docs/5.8) - Web Application Framework
 - [Bootstrap 5.3](https://getbootstrap.com/docs/5.3) - CSS Framework
 - [Bootstrap Icons](https://icons.getbootstrap.com/) - Icon Library
 
@@ -452,9 +431,6 @@ Aplikasi menggunakan OMDB API untuk mengambil data film.
 ### Development Tools
 - [Laragon](https://laragon.org/) - Local development environment
 - [Composer](https://getcomposer.org/) - Dependency manager for PHP
-
-### Inspiration
-- Movie database concept from IMDB, TMDB
 
 
 **Author**: Chucuyeah
