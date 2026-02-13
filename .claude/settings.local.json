@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php artisan make:migration:*)",
+      "Bash(php artisan migrate:*)",
+      "Bash(mysql:*)",
+      "Bash(php artisan make:model:*)",
+      "Bash(php artisan make:controller:*)",
+      "Bash(php artisan route:clear:*)",
+      "Bash(php artisan view:clear:*)",
+      "Bash(if exist \"bootstrap\\\\cache\\\\config.php\" del \"bootstrap\\\\cache\\\\config.php\")",
+      "Bash(chmod:*)",
+      "Bash(composer dump-autoload:*)",
+      "Bash(timeout:*)",
+      "Bash(test:*)"
+    ]
+  }
+}
